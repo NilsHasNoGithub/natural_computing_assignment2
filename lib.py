@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union, Callable
 import numpy as np
 from dataclasses import dataclass
 
@@ -12,6 +12,7 @@ class OptimizeResults:
     x_hist: List[Arr]
     v_hist: List[Arr]
     score_hist: List[Arr]
+    best: Arr
 
 
 class SwarmOptimizer(ABC):
@@ -20,8 +21,8 @@ class SwarmOptimizer(ABC):
         omega: float = 0.5,
         a1: float = 1.0,
         a2: float = 1.0,
-        r1: float = 0.5,
-        r2: float = 0.5,
+        r1: Union[float, Callable] = 0.5,
+        r2: Union[float, Callable] = 0.5,
         objective="max",
     ) -> None:
         super().__init__()
@@ -36,8 +37,8 @@ class SwarmOptimizer(ABC):
         self._omega = omega
         self._a1 = a1
         self._a2 = a2
-        self._r1 = r1
-        self._r2 = r2
+        self._r1 = (lambda: r1) if isinstance(r1, float) else r1
+        self._r2 = (lambda: r2) if isinstance(r2, float) else r2
 
     @abstractmethod
     def score(self, x: Arr):
@@ -54,8 +55,8 @@ class SwarmOptimizer(ABC):
 
         v_new = (
             self._omega * v
-            + self._a1 * self._r1 * (x_best - x)
-            + self._a2 * self._r2 * (best - x)
+            + self._a1 * self._r1() * (x_best - x)
+            + self._a2 * self._r2() * (best - x)
         )
         x_new = x + v_new
 
@@ -77,7 +78,7 @@ class SwarmOptimizer(ABC):
 
         return v_new, x_new, x_best_new, best_new
 
-    def optimize(self, v: Arr, x: Arr, n_steps: int = 100):
+    def optimize(self, v: Arr, x: Arr, n_steps: int = 100, use_tqdm: bool = True):
         arg_best = np.argmax if self._maximize else np.argmin
 
         score = self.score(x)
@@ -88,12 +89,12 @@ class SwarmOptimizer(ABC):
         v_hist = [v]
         score_hist = [score]
 
-        for _ in tqdm(range(n_steps)):
+        for _ in tqdm(range(n_steps), disable=not use_tqdm):
             v, x, x_best, best = self.update_step(v, x, x_best, best)
 
             x_hist.append(x)
             v_hist.append(v)
             score_hist.append(self.score(x))
 
-        return OptimizeResults(x_hist, v_hist, score_hist)
+        return OptimizeResults(x_hist, v_hist, score_hist, best)
 
