@@ -148,7 +148,7 @@ def plot_iris_clusters(iris_data: Arr, labels: Arr, title: str) -> "Figure":
     return fig  
 
 def print_err_result(typ: str, n_rounds: int, err: float):
-    print(f"Quatization error for {typ}, averaged over {n_rounds} runs: {err:.4f}")
+    print(f"Quantization error for {typ}, averaged over {n_rounds} runs: {err:.4f}")
 
 @click.command()
 @click.option(
