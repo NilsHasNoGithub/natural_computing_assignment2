@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 Arr = np.ndarray
 
+
 @dataclass
 class OptimizeResults:
     x_hist: List[Arr]
@@ -97,4 +98,3 @@ class SwarmOptimizer(ABC):
             score_hist.append(self.score(x))
 
         return OptimizeResults(x_hist, v_hist, score_hist, best)
-

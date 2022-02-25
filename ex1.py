@@ -5,16 +5,13 @@ from lib import SwarmOptimizer
 Arr = np.ndarray
 
 
-def prsep(c="=",n=50):
+def prsep(c="=", n=50):
     print(c * n)
 
 
-
 class Optimizer(SwarmOptimizer):
-
     def score(self, x: Arr):
         return np.sum(-x * np.sin(np.sqrt(np.abs(x))), axis=-1)
-    
 
 
 def main():
@@ -26,10 +23,10 @@ def main():
 
     hparams = dict(
         objective="max",
-        a1 = 1.0,
-        a2 = 1.0,
-        r1 = 0.5,
-        r2 = 0.5,
+        a1=1.0,
+        a2=1.0,
+        r1=0.5,
+        r2=0.5,
     )
 
     optim = Optimizer(**hparams)
@@ -44,14 +41,13 @@ def main():
     prsep()
     print("Ex. 1b:")
     for omega in [2.0, 0.5, 0.1]:
-        prsep('-')
+        prsep("-")
         print(f"{omega=}:")
         optim = Optimizer(omega=omega, **hparams)
         _, xs_new, *_ = optim.update_step(vs, xs, xs_best, best)
         fitt_new = optim.score(xs_new)
         for i in range(3):
             print(f"\tParticle {i+1}: x={xs_new[i, :]}, f={fitt_new[i]:.4f}")
-
 
 
 if __name__ == "__main__":

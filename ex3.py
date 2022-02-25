@@ -41,7 +41,9 @@ def quantization_error(centroids, closest_centroids, data):
     return sum_
 
 
-def test_k_means(data: Arr, n_classes: int, n_inits: int=10, max_iter:int=100) -> Tuple[Arr, float]:
+def test_k_means(
+    data: Arr, n_classes: int, n_inits: int = 10, max_iter: int = 100
+) -> Tuple[Arr, float]:
     all_centroids = []
     errors = []
 
@@ -93,11 +95,20 @@ class Optimzer(SwarmOptimizer):
 
         return result
 
-def test_poc(data: Arr, n_clusters: int, n_particles: int, max_iter: int, omega: float, a1: float, a2:float):
+
+def test_poc(
+    data: Arr,
+    n_clusters: int,
+    n_particles: int,
+    max_iter: int,
+    omega: float,
+    a1: float,
+    a2: float,
+):
     n_samples, n_features = data.shape
 
     r = lambda: np.random.uniform(0, 1, size=(1, n_features))
-    optim = Optimzer(data, objective="min", omega=omega, a1=a1, a2=a1, r1 = r, r2 = r)
+    optim = Optimzer(data, objective="min", omega=omega, a1=a1, a2=a1, r1=r, r2=r)
 
     particles = [
         data[np.random.choice(n_samples, n_clusters, replace=False), :]
@@ -126,10 +137,9 @@ def artificial_data_1(n_samples=400) -> Tuple[Arr, Arr]:
 
 def plot_iris_clusters(iris_data: Arr, labels: Arr, title: str) -> "Figure":
     n_samples, n_features = iris_data.shape
-    n_plots = n_features ** 2
+    n_plots = n_features**2
 
     assert n_features == 4
-
 
     fig, subplots = plt.subplots(n_features, n_features, figsize=(13, 13))
     fig.suptitle(title)
@@ -145,10 +155,12 @@ def plot_iris_clusters(iris_data: Arr, labels: Arr, title: str) -> "Figure":
             p.set_ylabel(f"$x_{j}$")
 
     fig.tight_layout()
-    return fig  
+    return fig
+
 
 def print_err_result(typ: str, n_rounds: int, err: float):
     print(f"Quantization error for {typ}, averaged over {n_rounds} runs: {err:.4f}")
+
 
 @click.command()
 @click.option(
@@ -165,7 +177,9 @@ def main(data_file: str, result_dir: str, n_rounds: int):
     iris_data = iris_df.iloc[:, :-1].values
     iris_labels = iris_df.iloc[:, -1].to_list()
 
-    k_means_results = Parallel(n_jobs=-1)(delayed(test_k_means)(iris_data, n_clusters) for _ in range(n_rounds))
+    k_means_results = Parallel(n_jobs=-1)(
+        delayed(test_k_means)(iris_data, n_clusters) for _ in range(n_rounds)
+    )
     k_means_error = np.mean([s[1] for s in k_means_results])
 
     k_means_result_iris = k_means_results[0][0]
@@ -198,7 +212,9 @@ def main(data_file: str, result_dir: str, n_rounds: int):
 
     artificial_data, labels = artificial_data_1()
 
-    k_means_results = Parallel(n_jobs=-1)(delayed(test_k_means)(artificial_data, n_clusters) for _ in range(n_rounds))
+    k_means_results = Parallel(n_jobs=-1)(
+        delayed(test_k_means)(artificial_data, n_clusters) for _ in range(n_rounds)
+    )
     k_means_error = np.mean([s[1] for s in k_means_results])
 
     k_means_centroids_artificial = k_means_results[0][0]
@@ -243,12 +259,13 @@ def main(data_file: str, result_dir: str, n_rounds: int):
     fig.tight_layout()
     fig.savefig(os.path.join(result_dir, "ex3_artificial_data_1.png"))
 
-
     # plot iris results
 
     # kmeans
     labels = calc_closest_centroids(iris_data, k_means_result_iris)
-    fig = plot_iris_clusters(iris_data, labels, "Iris data clusters generated with k-means")
+    fig = plot_iris_clusters(
+        iris_data, labels, "Iris data clusters generated with k-means"
+    )
     fig.savefig(os.path.join(result_dir, "ex3_iris_data_kmeans.png"))
 
     # poc
@@ -260,7 +277,6 @@ def main(data_file: str, result_dir: str, n_rounds: int):
     labels = LabelEncoder().fit_transform(iris_labels)
     fig = plot_iris_clusters(iris_data, labels, "Iris data clusters true labels")
     fig.savefig(os.path.join(result_dir, "ex3_iris_data_ground_truth.png"))
-
 
 
 if __name__ == "__main__":
